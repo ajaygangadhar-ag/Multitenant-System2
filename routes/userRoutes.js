@@ -13,7 +13,7 @@ const {
 } = require("../controllers/userController");
 
 const authMiddleware = require("../middleware/authMiddleware");
-const authorizeRoles = require("../middleware/rolemiddleware");
+const authorizeRoles = require("../middleware/roleMiddleware");
 const upload = require("../middleware/uploadMiddleware");
 // Create User
 router.post(
