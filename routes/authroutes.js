@@ -16,7 +16,7 @@ const {
   changePassword,
   getSettings,
   updateSettings,
-} = require("../controllers/authController");
+} = require("../controllers/authcontroller");
 
 const {
   registerValidation,
