@@ -13,12 +13,30 @@ const path = require("path");
 const errorMiddleware = require("./middleware/errorMiddleware");
 const activityLogRoutes = require("./routes/activityLogRoutes");
 
-connectDB();
-
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+
+// Root endpoint (deployment verification and health check)
+app.get("/", (req, res) => {
+  res.status(200).json({
+    status: "success",
+    message: "Multi-tenant Backend API is running successfully!",
+    timestamp: new Date().toISOString(),
+    endpoints: {
+      auth: "/api/auth",
+      tenants: "/api/tenants",
+      users: "/api/users",
+      dashboard: "/api/dashboard",
+      activityLogs: "/api/activity-logs",
+    },
+  });
+});
+
+// Favicon handlers to prevent 404 logs from browser requests
+app.get("/favicon.ico", (req, res) => res.status(204).end());
+app.get("/favicon.png", (req, res) => res.status(204).end());
 
 app.use(
   "/uploads",
@@ -52,15 +70,23 @@ app.use(
   activityLogRoutes
 );
 
+// Catch-all 404 handler for undefined routes
+app.use((req, res, next) => {
+  res.status(404).json({
+    status: "fail",
+    message: `Cannot ${req.method} ${req.originalUrl}`,
+  });
+});
+
 app.use(errorMiddleware);
 
-const PORT =
-  process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-  console.log(
-    `Server running on port ${PORT}`
-  );
-});
+// Only listen locally, serverless environments (e.g. Vercel) export the handler
+if (require.main === module) {
+  connectDB();
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
 
 module.exports = app;
